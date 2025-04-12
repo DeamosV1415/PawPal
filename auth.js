@@ -5,8 +5,8 @@ const nameInput = document.getElementById('name');
 const emailInput = document.getElementById('email');
 const passwordInput = document.getElementById('password');
 const submitButton = document.getElementById('submit-button');
-const toggleButton = document.getElementById('toggle-button');
-const toggleText = document.getElementById('toggle-text');
+const loginTab = document.getElementById('login-tab');
+const signupTab = document.getElementById('signup-tab');
 const resetPasswordButton = document.getElementById('reset-password');
 const forgotPasswordSection = document.getElementById('forgot-password');
 const errorMessage = document.getElementById('error-message');
@@ -15,16 +15,34 @@ const successMessage = document.getElementById('success-message');
 // State
 let isLogin = true;
 
-// Toggle between login and signup forms
-function toggleForm() {
-  isLogin = !isLogin;
+// Switch to login form
+function showLoginForm() {
+  isLogin = true;
   
   // Update UI
-  nameField.style.display = isLogin ? 'none' : 'block';
-  submitButton.textContent = isLogin ? 'Log In' : 'Sign Up';
-  toggleText.textContent = isLogin ? "Don't have an account? " : "Already have an account? ";
-  toggleButton.textContent = isLogin ? 'Sign Up' : 'Log In';
-  forgotPasswordSection.style.display = isLogin ? 'flex' : 'none';
+  loginTab.classList.add('active');
+  signupTab.classList.remove('active');
+  nameField.style.display = 'none';
+  submitButton.textContent = 'Log In';
+  forgotPasswordSection.style.display = 'flex';
+  
+  // Clear messages
+  hideMessages();
+  
+  // Optional: Clear form
+  authForm.reset();
+}
+
+// Switch to signup form
+function showSignupForm() {
+  isLogin = false;
+  
+  // Update UI
+  loginTab.classList.remove('active');
+  signupTab.classList.add('active');
+  nameField.style.display = 'block';
+  submitButton.textContent = 'Sign Up';
+  forgotPasswordSection.style.display = 'none';
   
   // Clear messages
   hideMessages();
@@ -95,6 +113,11 @@ async function handleSubmit(e) {
   const password = passwordInput.value.trim();
   const name = nameInput.value.trim();
   
+  if (!isLogin && !name) {
+    showError('Please enter your name');
+    return;
+  }
+  
   try {
     submitButton.disabled = true;
     submitButton.textContent = 'Please wait...';
@@ -120,7 +143,7 @@ async function handleSubmit(e) {
       showSuccess('Account created successfully!');
       
       // Optionally switch to login form after successful signup
-      // toggleForm();
+      // showLoginForm();
     }
   } catch (error) {
     showError(formatErrorMessage(error));
@@ -131,10 +154,10 @@ async function handleSubmit(e) {
 }
 
 // Event Listeners
-toggleButton.addEventListener('click', toggleForm);
+loginTab.addEventListener('click', showLoginForm);
+signupTab.addEventListener('click', showSignupForm);
 resetPasswordButton.addEventListener('click', handlePasswordReset);
 authForm.addEventListener('submit', handleSubmit);
 
-// Initialize the UI (this ensures the form starts in login mode)
-toggleForm();
-toggleForm(); // Call twice to reset to login mode (simpler than duplicating code)
+// Initialize the UI (start with login form)
+showLoginForm();
